@@ -1,0 +1,15 @@
+{
+  "model": "yolo11n.pt",
+  "data": "datasets/my_dataset/my_dataset.yaml",
+  "epochs": 50,
+  "batch_size": 8,
+  "img_size": 512,
+  "device": "0",
+  "patience": 10,
+  "save_period": 5,
+  "cache": true,
+  "workers": 4,
+  "project": "training_results",
+  "name": "fast_training",
+  "description": "Fast training configuration for quick testing"
+} 

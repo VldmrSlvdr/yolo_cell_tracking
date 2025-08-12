@@ -1,0 +1,14 @@
+# YOLOv9c model configuration for cell detection
+model: yolov9c.pt
+data: datasets/cell_detection.yaml
+epochs: 100
+batch_size: 12
+img_size: 1024
+device: 0
+patience: 20
+save_period: 10
+cache: true
+workers: 8
+project: training_results
+name: cell_detection_yolov9c
+description: Cell detection training with YOLOv9c 

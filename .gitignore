@@ -1,0 +1,30 @@
+# python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pyw
+*.pyz
+*.pywz
+*.pyzw
+
+# datasets
+datasets/
+
+# training results
+training_results/
+
+# logs
+*.log
+*.log.*
+*.log.*.*
+*.log.*.*.*
+*.log.*.*.*.*
+*.log.*.*.*.*.*
+
+# model files
+*.pth
+*.pt
+*.pt.gz
+*.pt.tar
+*.pt.tar.gz

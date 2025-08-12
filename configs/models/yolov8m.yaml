@@ -1,0 +1,14 @@
+# YOLOv8m model configuration for cell detection
+model: yolov8m.pt
+data: datasets/cell_detection.yaml
+epochs: 100
+batch_size: 8
+img_size: 1024
+device: 0
+patience: 20
+save_period: 10
+cache: true
+workers: 8
+project: training_results
+name: cell_detection_yolov8m
+description: Cell detection training with YOLOv8m 

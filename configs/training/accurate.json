@@ -1,0 +1,15 @@
+{
+  "model": "yolo11s.pt",
+  "data": "datasets/my_dataset/my_dataset.yaml",
+  "epochs": 200,
+  "batch_size": 16,
+  "img_size": 1024,
+  "device": "0",
+  "patience": 30,
+  "save_period": 20,
+  "cache": true,
+  "workers": 8,
+  "project": "training_results",
+  "name": "accurate_training",
+  "description": "Accurate training configuration for best results"
+} 
