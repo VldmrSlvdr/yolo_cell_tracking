@@ -54,7 +54,7 @@ def main():
     parser = argparse.ArgumentParser(description='Train YOLO models for cell detection')
     parser.add_argument('--model', type=str, default='all', 
                        choices=['all', 'yolov8', 'yolov9', 'yolo11', 'yolov8n', 'yolov8s', 'yolov8m', 'yolov8l', 'yolov8x', 
-                               'yolov9c', 'yolov9e', 'yolo11n', 'yolo11s', 'yolo11m', 'yolo11l', 'yolo11x'],
+                               'yolov9c', 'yolov9e', 'yolo11n', 'yolo11s', 'yolo11m', 'yolo11l', 'yolo11x', 'cpu_yolov8n'],
                        help='Model(s) to train')
     parser.add_argument('--config-dir', type=str, default='configs/models',
                        help='Directory containing model configurations')
@@ -75,6 +75,7 @@ def main():
         'yolo11m': 'configs/models/yolo11m.yaml',
         'yolo11l': 'configs/models/yolo11l.yaml',
         'yolo11x': 'configs/models/yolo11x.yaml',
+        'cpu_yolov8n': 'configs/models/cpu_yolov8n.yaml',
     }
     
     # Determine which models to train

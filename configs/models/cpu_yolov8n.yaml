@@ -4,11 +4,11 @@ data: datasets/cell_detection.yaml
 epochs: 100
 batch_size: 16
 img_size: 1024
-device: 0
+device: cpu
 patience: 0
 save_period: 10
 cache: true
 workers: 8
 project: training_results
-name: cell_detection_yolov8n_16bs
+name: cell_detection_yolov8n_16bs_cpu
 description: Cell detection training with YOLOv8n 

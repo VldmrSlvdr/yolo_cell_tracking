@@ -13,6 +13,7 @@ datasets/
 
 # training results
 training_results/
+comparison_results_*/
 
 # logs
 *.log

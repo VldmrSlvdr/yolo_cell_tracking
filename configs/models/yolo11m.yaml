@@ -2,13 +2,13 @@
 model: yolo11m.pt
 data: datasets/cell_detection.yaml
 epochs: 100
-batch_size: 8
+batch_size: 16
 img_size: 1024
 device: 0
-patience: 100
+patience: 0
 save_period: 10
 cache: true
 workers: 8
 project: training_results
-name: cell_detection_yolo11m
+name: cell_detection_yolo11m_16bs
 description: Cell detection training with YOLO11m 
