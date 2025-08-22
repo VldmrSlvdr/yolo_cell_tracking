@@ -70,6 +70,7 @@ def main():
         'yolo11m': 'configs/models/yolo11m.yaml',
         'yolo11l': 'configs/models/yolo11l.yaml',
         'yolo11x': 'configs/models/yolo11x.yaml',
+        'cpu_yolov8n': 'configs/models/cpu_yolov8n.yaml',
     }
     
     print(f"🔍 Evaluating models in: {args.results_dir}")
