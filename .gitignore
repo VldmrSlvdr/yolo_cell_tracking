@@ -14,6 +14,8 @@ datasets/
 # training results
 training_results/
 comparison_results_*/
+test_image/
+results/
 
 # logs
 *.log
