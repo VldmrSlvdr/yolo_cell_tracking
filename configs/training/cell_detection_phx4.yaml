@@ -1,0 +1,44 @@
+# PHX4 Cell Detection Training Configuration
+# YOLO11n model training on PHX4 dataset
+
+model: yolov8n.pt
+data: configs/datasets/cell_detection_phx4.yaml
+epochs: 100
+batch_size: 16
+img_size: 1024
+device: "0"
+patience: 20
+save_period: 10
+cache: true
+workers: 8
+max_det: 1500
+project: training_results_phx4
+name: cell_detection_phx4_yolov8n_16bs_w_dataaug_1500maxdet
+description: PHX4 Cell detection training with YOLOv8n with 16bs batch size and data augmentation
+
+# ===== DATA AUGMENTATION SETTINGS =====
+# To DISABLE all augmentations, set all values below to 0 or false
+# To ENABLE augmentations, use the values shown below
+
+# Color augmentation (HSV)
+hsv_h: 0.015      # HSV-Hue augmentation (0.0 to disable)
+hsv_s: 0.7        # HSV-Saturation augmentation (0.0 to disable)
+hsv_v: 0.4        # HSV-Value augmentation (0.0 to disable)
+
+# Geometric augmentation
+degrees: 0.0      # Image rotation (+/- deg, 0.0 to disable)
+translate: 0.1    # Image translation (+/- fraction, 0.0 to disable)
+scale: 0.5        # Image scale (+/- gain, 0.0 to disable)
+shear: 0.0        # Image shear (+/- deg, 0.0 to disable)
+perspective: 0.0  # Image perspective (+/- fraction, 0.0 to disable)
+
+# Flip augmentation
+fliplr: 0.5       # Horizontal flip probability (0.0 to disable)
+flipud: 0.0       # Vertical flip probability (0.0 to disable)
+
+# Advanced augmentation
+mosaic: 1.0       # Mosaic augmentation probability (0.0 to disable)
+mixup: 0.0        # MixUp augmentation probability (0.0 to disable)
+copy_paste: 0.0   # Copy-paste augmentation probability (0.0 to disable)
+auto_augment: randaugment  # Auto augmentation policy (set to null or "" to disable)
+erasing: 0.4      # Random erasing probability (0.0 to disable)

@@ -25,33 +25,61 @@ def train_model(config_path):
     print(f"Model: {config['model']}")
     print(f"Data: {config['data']}")
     print(f"Epochs: {config['epochs']}")
-    print(f"Batch size: {config['batch_size']}")
-    print(f"Image size: {config['img_size']}")
+    print(f"Batch size: {config.get('batch_size')}")
+    print(f"Image size: {config.get('img_size')}")
     print(f"Device: {config['device']}")
+    if 'max_det' in config:
+        print(f"Max detections: {config['max_det']}")
     
     # Create model
     model = YOLO(config['model'])
     
+    # Prepare training parameters - map config keys to YOLO parameter names
+    param_mapping = {
+        'batch_size': 'batch',
+        'img_size': 'imgsz',
+        'description': None,  # Skip description field
+    }
+    
+    # Build training kwargs dynamically from ALL config parameters
+    train_kwargs = {}
+    for key, value in config.items():
+        # Skip None values, description, and model (already used)
+        if value is None or key in ['description', 'model']:
+            continue
+            
+        # Get the YOLO parameter name (use mapping or original key)
+        param_name = param_mapping.get(key, key)
+        if param_name is None:
+            continue
+            
+        train_kwargs[param_name] = value
+    
+    # Set exist_ok to False by default to prevent resuming with old parameters
+    if 'exist_ok' not in train_kwargs:
+        train_kwargs['exist_ok'] = False
+    
+    # Ensure save is enabled
+    if 'save' not in train_kwargs:
+        train_kwargs['save'] = True
+    
+    print(f"\n🔧 Training parameters:")
+    print(f"   Total parameters: {len(train_kwargs)}")
+    if 'max_det' in train_kwargs:
+        print(f"   max_det: {train_kwargs['max_det']}")
+    if 'exist_ok' in train_kwargs:
+        print(f"   exist_ok: {train_kwargs['exist_ok']}")
+    print()
+    
     # Start training
     try:
-        results = model.train(
-            data=config['data'],
-            epochs=config['epochs'],
-            batch=config['batch_size'],
-            imgsz=config['img_size'],
-            device=config['device'],
-            patience=config['patience'],
-            save_period=config['save_period'],
-            cache=config['cache'],
-            workers=config['workers'],
-            project=config['project'],
-            name=config['name'],
-            exist_ok=True
-        )
+        results = model.train(**train_kwargs)
         print(f"✅ Training completed successfully!")
         return True
     except Exception as e:
         print(f"❌ Training failed: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return False
 
 def main():

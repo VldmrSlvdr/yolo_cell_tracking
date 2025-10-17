@@ -6,6 +6,7 @@ YOLO Training Script - Supports YOLO8-11 models
 import os
 import sys
 import json
+import yaml
 import argparse
 import subprocess
 import time
@@ -13,12 +14,17 @@ from pathlib import Path
 from typing import Dict, Any, Optional
 
 def load_config(config_path: str) -> Dict[str, Any]:
-    """Load configuration from JSON file"""
+    """Load configuration from JSON or YAML file"""
     if not os.path.exists(config_path):
         raise FileNotFoundError(f"Config file not found: {config_path}")
     
-    with open(config_path, 'r') as f:
-        config = json.load(f)
+    # Support both JSON and YAML
+    if config_path.endswith('.yaml') or config_path.endswith('.yml'):
+        with open(config_path, 'r') as f:
+            config = yaml.safe_load(f)
+    else:
+        with open(config_path, 'r') as f:
+            config = json.load(f)
     
     return config
 
@@ -88,33 +94,54 @@ def run_training(config: Dict[str, Any], verbose: bool = True) -> bool:
     """Run YOLO training with configuration"""
     
     print(f"🚀 Starting YOLO training...")
-    print(f"🤖 Model: {config['model']}")
-    print(f"📁 Dataset: {config['data']}")
-    print(f"⏱️  Epochs: {config['epochs']}")
-    print(f"📦 Batch size: {config['batch_size']}")
-    print(f"🖼️  Image size: {config['img_size']}")
-    print(f"💻 Device: {config['device']}")
-    print(f"📊 Project: {config['project']}")
+    print(f"🤖 Model: {config.get('model')}")
+    print(f"📁 Dataset: {config.get('data')}")
+    print(f"⏱️  Epochs: {config.get('epochs')}")
+    print(f"📦 Batch size: {config.get('batch_size')}")
+    print(f"🖼️  Image size: {config.get('img_size')}")
+    print(f"💻 Device: {config.get('device')}")
+    print(f"📊 Project: {config.get('project')}")
+    if 'max_det' in config:
+        print(f"🎯 Max detections: {config['max_det']}")
     print("=" * 60)
     
-    # Build training command
-    cmd = [
-        "yolo", "train",
-        f"model={config['model']}",
-        f"data={config['data']}",
-        f"epochs={config['epochs']}",
-        f"batch={config['batch_size']}",
-        f"imgsz={config['img_size']}",
-        f"device={config['device']}",
-        f"patience={config['patience']}",
-        "save=True",
-        f"save_period={config['save_period']}",
-        f"cache={config['cache']}",
-        f"workers={config['workers']}",
-        f"project={config['project']}",
-        f"name={config['name']}",
-        "exist_ok=True"
-    ]
+    # Build training command - start with base parameters
+    cmd = ["yolo", "train"]
+    
+    # Map config keys to YOLO parameter names
+    param_mapping = {
+        'batch_size': 'batch',
+        'img_size': 'imgsz',
+        'description': None,  # Skip this - it's just a comment
+    }
+    
+    # Add all config parameters dynamically
+    for key, value in config.items():
+        # Skip None values and description
+        if value is None or key == 'description':
+            continue
+            
+        # Get the YOLO parameter name (use mapping or original key)
+        param_name = param_mapping.get(key, key)
+        if param_name is None:
+            continue
+            
+        # Format the parameter
+        if isinstance(value, bool):
+            cmd.append(f"{param_name}={str(value)}")
+        elif isinstance(value, str):
+            cmd.append(f"{param_name}={value}")
+        else:
+            cmd.append(f"{param_name}={value}")
+    
+    # Ensure exist_ok is False by default to prevent resuming with old parameters
+    # If you want to resume training, explicitly set exist_ok: true in your config
+    if 'exist_ok' not in config:
+        cmd.append("exist_ok=False")
+    
+    # Ensure save is set
+    if 'save' not in config:
+        cmd.append("save=True")
     
     if verbose:
         print(f"🔧 Command: {' '.join(cmd)}")

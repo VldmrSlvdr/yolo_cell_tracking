@@ -1,0 +1,16 @@
+{
+  "model": "yolo11n.pt",
+  "data": "configs/datasets/cell_detection_phx4.yaml",
+  "epochs": 100,
+  "batch_size": 16,
+  "img_size": 1024,
+  "device": "0",
+  "patience": 20,
+  "save_period": 10,
+  "cache": true,
+  "workers": 8,
+  "project": "training_results_phx4",
+  "name": "cell_detection_phx4_yolo11n",
+  "description": "PHX4 Cell detection training with YOLO11n"
+}
+

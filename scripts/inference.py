@@ -258,13 +258,38 @@ def run_inference(model_path: str,
                  save_dir: str = None,
                  show_labels: bool = True,
                  compare_gt: bool = False,
-                 iou_threshold: float = 0.5):
+                 iou_threshold: float = 0.5,
+                 max_det: int = None):
     """Run YOLO11 inference on an image using Python API"""
+    
+    # Try to read max_det from model's args.yaml if not specified
+    if max_det is None:
+        try:
+            # Model path is typically: training_results/.../weights/best.pt
+            # Args.yaml is at: training_results/.../args.yaml
+            model_dir = os.path.dirname(os.path.dirname(os.path.abspath(model_path)))
+            args_yaml_path = os.path.join(model_dir, 'args.yaml')
+            
+            if os.path.exists(args_yaml_path):
+                import yaml
+                with open(args_yaml_path, 'r') as f:
+                    args_yaml = yaml.safe_load(f)
+                    if 'max_det' in args_yaml:
+                        max_det = args_yaml['max_det']
+                        print(f"📋 Loaded max_det={max_det} from model's args.yaml")
+        except Exception as e:
+            pass
+    
+    # Fallback to default if still None
+    if max_det is None:
+        max_det = 300
+        print(f"⚠️  Using default max_det=300")
     
     print(f"🔍 Running YOLO11 inference...")
     print(f"🤖 Model: {model_path}")
     print(f"🖼️  Image: {image_path}")
     print(f"🎯 Confidence: {confidence}")
+    print(f"🎯 Max detections: {max_det}")
     print(f"💻 Device: {device}")
     print(f"🏷️  Show labels: {show_labels}")
     if compare_gt:
@@ -301,6 +326,7 @@ def run_inference(model_path: str,
         source=image_path,
         conf=confidence,
         device=device,
+        max_det=max_det,  # Maximum number of detections per image
         save=False,  # Don't auto-save images, we'll handle it
         save_txt=True,  # Save label txt files
         save_conf=True,  # Save confidence in txt files
@@ -388,6 +414,8 @@ def main():
                        help="Search for image by name in dataset directories")
     parser.add_argument("--confidence", type=float, default=0.25,
                        help="Confidence threshold (default: 0.25)")
+    parser.add_argument("--max-det", type=int, default=None,
+                       help="Maximum number of detections per image (default: auto-detect from model's args.yaml or 300)")
     parser.add_argument("--device", type=str, default="0",
                        help="Device to use (0 for GPU, cpu for CPU)")
     parser.add_argument("--save-dir", type=str, default=None,
@@ -445,7 +473,8 @@ def main():
         save_dir=args.save_dir,
         show_labels=not args.label_switch,  # Invert the switch
         compare_gt=args.compare_gt,
-        iou_threshold=args.iou_threshold
+        iou_threshold=args.iou_threshold,
+        max_det=args.max_det
     )
 
 if __name__ == "__main__":

@@ -95,9 +95,47 @@ python scripts/inference.py --model models/best.pt --search image_name
 # Hide labels in output visualization (show only bounding boxes)
 python scripts/inference.py --model models/best.pt --search image_name --label_switch
 
+# Compare predictions with ground truth (blue=GT missed, green=correct, red=wrong)
+python scripts/inference.py --model models/best.pt --search image_name --compare-gt
+
 # Save results to custom directory
 python scripts/inference.py --model models/best.pt --image path/to/image.jpg --save-dir results/
 ```
+
+## 🧬 PHX4 Dataset Training
+
+### Quick Start with PHX4 Dataset
+
+```bash
+# 1. Convert PHX4 dataset (if not already done)
+python scripts/convert_cell_dataset.py \
+  --dataset-dir /mnt/f/Datasets/celldetection/dataset_phx4 \
+  --output-dir datasets_phx4 \
+  --dataset-name cell_detection_phx4
+
+# 2. Train with data augmentation (recommended)
+python train_single_model.py --config configs/training/cell_detection_phx4.yaml
+
+# 3. Train WITHOUT data augmentation (for comparison)
+python train_single_model.py --config configs/training/cell_detection_phx4_no_aug.yaml
+
+# 4. Train with small model (better accuracy)
+python train_single_model.py --config configs/training/cell_detection_phx4_small.yaml
+
+# 5. Train with medium model (best accuracy)
+python train_single_model.py --config configs/training/cell_detection_phx4_medium.yaml
+
+# 6. Run inference - max_det is automatically loaded from model's training config
+python scripts/inference.py \
+  --model training_results_phx4/cell_detection_phx4_yolov8n_16bs_no_dataaug_1500maxdet/weights/best.pt \
+  --search test_image.jpg \
+  --compare-gt \
+  --save-dir results/phx4_inference
+```
+
+📖 **See [PHX4 Training Guide](docs/PHX4_TRAINING_GUIDE.md) for detailed instructions**
+
+📋 **See [CHANGELOG.md](CHANGELOG.md) for recent updates and fixes**
 
 ## 📋 Configuration Management
 
@@ -131,38 +169,90 @@ python scripts/inference.py --model models/best.pt --image path/to/image.jpg --s
 
 ### Training Configurations
 
-```json
-// configs/training/default.json
-{
-  "model": "yolo11n.pt",
-  "data": "configs/datasets/cell_detection.json",
-  "epochs": 100,
-  "batch_size": 16,
-  "img_size": 640,
-  "device": "0",
-  "patience": 20,
-  "save_period": 10,
-  "cache": true,
-  "workers": 8,
-  "project": "training_results",
-  "name": "exp"
-}
+YAML format is recommended for better readability and support for comments:
+
+```yaml
+# configs/training/cell_detection_phx4.yaml
+model: yolov8n.pt
+data: configs/datasets/cell_detection_phx4.yaml
+epochs: 100
+batch_size: 16
+img_size: 1024
+device: "0"
+patience: 20
+save_period: 10
+cache: true
+workers: 8
+max_det: 1500  # Maximum detections per image (default: 300)
+project: training_results_phx4
+name: cell_detection_phx4_yolov8n_16bs_w_dataaug_1500maxdet
+
+# Data Augmentation Settings (set to 0 to disable)
+hsv_h: 0.015      # HSV-Hue augmentation
+hsv_s: 0.7        # HSV-Saturation augmentation
+hsv_v: 0.4        # HSV-Value augmentation
+degrees: 0.0      # Image rotation
+translate: 0.1    # Image translation
+scale: 0.5        # Image scale
+fliplr: 0.5       # Horizontal flip probability
+mosaic: 1.0       # Mosaic augmentation
+auto_augment: randaugment
+erasing: 0.4      # Random erasing
 ```
 
-## 🔧 Advanced Usage
+**Key Parameters:**
+- `max_det`: Maximum number of detections per image (increase for dense scenes)
+- Data augmentation parameters can be disabled by setting to 0
+- Use unique `name` for each experiment to avoid overwriting results
 
-### Custom Training Configuration
+## ⚙️ Important Configuration Notes
+
+### Maximum Detections (`max_det`)
+
+The `max_det` parameter controls the maximum number of objects detected per image:
+- Default: 300 detections per image
+- For dense scenes (many cells): Set to 1500 or higher
+- **Automatically applied**: Inference script reads `max_det` from trained model's config
+- Manual override: Use `--max-det` flag during inference
 
 ```bash
-# Create custom config
-python scripts/create_config.py --template training --output my_config.json
+# Training automatically saves max_det in model config
+python train_single_model.py --config configs/training/cell_detection_phx4.yaml
 
-# Edit config
-python scripts/edit_config.py --config my_config.json
+# Inference automatically uses model's max_det (no flag needed!)
+python scripts/inference.py --model path/to/best.pt --image test.jpg
 
-# Validate config
-python scripts/validate_config.py --config my_config.json
+# Or manually override if needed
+python scripts/inference.py --model path/to/best.pt --image test.jpg --max-det 2000
 ```
+
+### Data Augmentation Control
+
+Toggle augmentation by editing config or using different config files:
+
+```yaml
+# Enable augmentation (configs/training/cell_detection_phx4.yaml)
+hsv_h: 0.015
+mosaic: 1.0
+fliplr: 0.5
+
+# Disable augmentation (configs/training/cell_detection_phx4_no_aug.yaml)
+hsv_h: 0.0
+mosaic: 0.0
+fliplr: 0.0
+```
+
+### Best Practices
+
+1. **Use unique experiment names** to avoid overwriting results
+2. **Delete old training directories** before retraining with new parameters
+3. **Verify training parameters** by checking `args.yaml` after training starts:
+   ```bash
+   cat training_results_phx4/your_experiment/args.yaml | grep max_det
+   ```
+4. **YAML configs recommended** over JSON for better readability
+
+## 🔧 Advanced Usage
 
 ### Model Comparison
 
@@ -186,17 +276,14 @@ python scripts/report.py --project training_results/exp
 
 ## 📊 Supported Models
 
-| Model | Version | Parameters | Speed | Accuracy |
-|-------|---------|------------|-------|----------|
-| YOLO8n | 8.x | 3.2M | Fast | Good |
-| YOLO8s | 8.x | 11.2M | Medium | Better |
-| YOLO8m | 8.x | 25.9M | Slow | Best |
-| YOLO9n | 9.x | 2.6M | Fast | Good |
-| YOLO9s | 9.x | 9.4M | Medium | Better |
-| YOLO10n | 10.x | 2.6M | Fast | Good |
-| YOLO10s | 10.x | 9.4M | Medium | Better |
-| YOLO11n | 11.x | 2.6M | Fast | Good |
-| YOLO11s | 11.x | 9.4M | Medium | Better |
+| Model | Version | Parameters | Speed | Accuracy | Recommended Use |
+|-------|---------|------------|-------|----------|-----------------|
+| YOLO8n | 8.x | 3.2M | Fast | Good | Testing, Fast inference |
+| YOLO8s | 8.x | 11.2M | Medium | Better | Balanced performance |
+| YOLO8m | 8.x | 25.9M | Slow | Best | High accuracy needed |
+| YOLO11n | 11.x | 2.6M | Fast | Good | **Default choice** |
+| YOLO11s | 11.x | 9.4M | Medium | Better | Production use |
+| YOLO11m | 11.x | 20M+ | Slow | Best | Maximum accuracy |
 
 ## 🎯 Examples
 
@@ -336,6 +423,28 @@ python scripts/inference.py --model models/best.pt --search test_image --confide
 3. Make your changes
 4. Add tests
 5. Submit a pull request
+
+## 📁 Repository Organization
+
+### Active Files
+- `train_single_model.py` - **Main training script** (use this!)
+- `scripts/` - Inference, conversion, and utility scripts
+- `configs/` - Training, model, and dataset configurations
+- `docs/` - Documentation and guides
+
+### Archived Files
+- `archive/old_scripts/` - Deprecated scripts kept for reference
+- `docs/archive/` - Resolved issue documentation
+
+See `archive/README.md` and `docs/archive/README.md` for details.
+
+## 📝 Recent Updates
+
+See [CHANGELOG.md](CHANGELOG.md) for recent fixes and improvements:
+- Fixed `max_det` parameter handling in training and inference
+- Added automatic parameter reading from model configs
+- Improved data augmentation controls
+- Updated to YAML-based configuration
 
 ## 📄 License
 

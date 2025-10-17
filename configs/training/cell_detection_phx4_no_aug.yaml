@@ -1,0 +1,44 @@
+# PHX4 Cell Detection Training Configuration - NO DATA AUGMENTATION
+# YOLO11n model training on PHX4 dataset without data augmentation
+
+model: yolov8n.pt
+data: configs/datasets/cell_detection_phx4.yaml
+epochs: 100
+batch_size: 16
+img_size: 1024
+device: "0"
+patience: 20
+save_period: 10
+cache: true
+workers: 8
+max_det: 1500
+project: training_results_phx4
+name: cell_detection_phx4_yolov8n_16bs_no_dataaug_1500maxdet
+description: PHX4 Cell detection training with YOLOv8n - NO data augmentation
+
+# ===== DATA AUGMENTATION SETTINGS - ALL DISABLED =====
+
+# Color augmentation (HSV) - DISABLED
+hsv_h: 0.0
+hsv_s: 0.0
+hsv_v: 0.0
+
+# Geometric augmentation - DISABLED
+degrees: 0.0
+translate: 0.0
+scale: 0.0
+shear: 0.0
+perspective: 0.0
+
+# Flip augmentation - DISABLED
+fliplr: 0.0
+flipud: 0.0
+
+# Advanced augmentation - DISABLED
+mosaic: 0.0
+mixup: 0.0
+copy_paste: 0.0
+auto_augment: null
+erasing: 0.0
+
+

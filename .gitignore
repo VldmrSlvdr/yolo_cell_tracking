@@ -9,13 +9,21 @@ __pycache__/
 *.pyzw
 
 # datasets
+archive/
+docs/
 datasets/
+datasets_phx4/
 
 # training results
 training_results/
+training_results_*/
 comparison_results_*/
 test_image/
 results/
+models/
+
+# inference results
+runs/
 
 # logs
 *.log

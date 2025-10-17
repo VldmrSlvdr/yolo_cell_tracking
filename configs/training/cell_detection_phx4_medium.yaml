@@ -1,0 +1,17 @@
+# PHX4 Cell Detection Training Configuration - Medium Model
+# YOLO11m model training on PHX4 dataset
+
+model: yolo11m.pt
+data: configs/datasets/cell_detection_phx4.yaml
+epochs: 100
+batch_size: 8
+img_size: 1024
+device: "0"
+patience: 20
+save_period: 10
+cache: true
+workers: 8
+project: training_results_phx4
+name: cell_detection_phx4_yolo11m
+description: PHX4 Cell detection training with YOLO11m (medium)
+
